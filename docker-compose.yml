@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  # PostgreSQL with PostGIS extension
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: herbnexus-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: herbnexus
+      POSTGRES_USER: herbnexus
+      POSTGRES_PASSWORD: herbnexus_dev_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U herbnexus"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+    driver: local
