@@ -24,10 +24,16 @@ app.add_middleware(
 os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
+from sqlalchemy import text
+
 @app.on_event("startup")
 async def startup():
     # Create tables
     async with engine.begin() as conn:
+        try:
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis;"))
+        except Exception as e:
+            print(f"Warning: Could not create postgis extension: {e}")
         # await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
